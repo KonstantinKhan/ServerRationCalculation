@@ -1,6 +1,7 @@
 package com.khan366kos.serverrationcalculation.controllers
 
 import com.fasterxml.jackson.annotation.JsonView
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.khan366kos.serverrationcalculation.models.Ration
 import com.khan366kos.serverrationcalculation.models.RationProduct
 import com.khan366kos.serverrationcalculation.models.View
@@ -37,12 +38,14 @@ class RationController {
             produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @JsonView(View.REST::class)
-    fun addProduct(@PathVariable date: String, @RequestBody rationProduct: RationProduct,
-                   @RequestBody user: Long): Ration {
+    fun addProduct(@PathVariable date: String, @RequestBody string: String): Ration {
         var ration: Ration
+        val mapper = ObjectMapper()
+        val v = mapper.readTree(string)
+        val rationProduct = mapper.readValue(v[0].toString(), RationProduct::class.java)
         try {
             // Получаем рацион по переданной дате
-            ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user)
+            ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), v[1].asLong())
         } catch (e: EmptyResultDataAccessException) {
             // Создаем пустой рацион для добавления в него выбранного продукта.
             ration = Ration(0, Date(), 0.0, 0.0, 0.0, 0.0, null)
@@ -51,10 +54,10 @@ class RationController {
         ration.addProduct(rationProduct.product, rationProduct.eating)
         // Сохраняем рацион в базу
         rationsRepository.save(ration)
-        ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user)
+        ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), v[1].asLong())
         rationsRepository.save(ration)
         // Получаем рацион из базы
-        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user)
+        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), v[1].asLong())
     }
 
     // Удаление продукта из рациона
