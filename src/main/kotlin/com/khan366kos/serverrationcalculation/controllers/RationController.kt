@@ -37,23 +37,24 @@ class RationController {
             produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @JsonView(View.REST::class)
-    fun addProduct(@PathVariable date: String, @RequestBody rationProduct: RationProduct): Ration {
+    fun addProduct(@PathVariable date: String, @RequestBody rationProduct: RationProduct,
+                   @RequestBody user: Long): Ration {
         var ration: Ration
         try {
             // Получаем рацион по переданной дате
-            ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date))
+            ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user)
         } catch (e: EmptyResultDataAccessException) {
             // Создаем пустой рацион для добавления в него выбранного продукта.
-            ration = Ration(0, Date(), 0.0, 0.0, 0.0, 0.0)
+            ration = Ration(0, Date(), 0.0, 0.0, 0.0, 0.0, null)
         }
         // Добавляем продукт в рацион.
         ration.addProduct(rationProduct.product, rationProduct.eating)
         // Сохраняем рацион в базу
         rationsRepository.save(ration)
-        ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date))
+        ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user)
         rationsRepository.save(ration)
         // Получаем рацион из базы
-        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date))
+        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user)
     }
 
     // Удаление продукта из рациона
@@ -62,19 +63,20 @@ class RationController {
             produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @JsonView(View.REST::class)
-    fun deleteProduct(@PathVariable date: String, @RequestBody id: Long): Ration {
-        val ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date))
+    fun deleteProduct(@PathVariable date: String, @RequestBody id: Long, @RequestBody user: Long): Ration {
+        val ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user)
         ration.deleteProduct(id)
         ration.update()
         rationsRepository.save(ration)
-        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date))
+        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user)
     }
 
     @RequestMapping("update/ration/{date}", method = [RequestMethod.PATCH], produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @JsonView(View.REST::class)
-    fun update(@PathVariable date: String, @RequestBody rationProduct: RationProduct): Ration {
-        val ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date))
+    fun update(@PathVariable date: String, @RequestBody rationProduct: RationProduct,
+               @RequestBody user: Long): Ration {
+        val ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user)
         ration.ration_product.forEach { value ->
             if (value.rationProductId == rationProduct.rationProductId) {
                 value.weight = rationProduct.weight
@@ -83,15 +85,17 @@ class RationController {
         ration.update()
         rationsRepository.save(ration)
 
-        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date))
+        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user)
     }
 
-    @RequestMapping("/ration/{date}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @RequestMapping("/ration/{date}",
+            method = [RequestMethod.POST], produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @JsonView(View.REST::class)
-    fun getRationJSON(@PathVariable date: String): Ration? {
+    fun getRationJSON(@PathVariable date: String, @RequestBody user: Long): Ration? {
+
         return try {
-            rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date))
+            rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user)
         } catch (e: EmptyResultDataAccessException) {
             null
         }
@@ -102,12 +106,12 @@ class RationController {
             produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @JsonView(View.REST::class)
-    fun clearRation(@PathVariable date: String): Ration {
-        val ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date))
+    fun clearRation(@PathVariable date: String, @RequestBody user: Long): Ration {
+        val ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user)
         ration.clear()
         ration.update()
         rationsRepository.save(ration)
-        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date))
+        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user)
     }
 
     /*@RequestMapping("/ration", method = [RequestMethod.POST], produces = [MediaType.APPLICATION_JSON_VALUE])

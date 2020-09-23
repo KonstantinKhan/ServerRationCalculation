@@ -30,6 +30,10 @@ data class Ration(
         @JsonView(View.REST::class)
         var carbohydrates: Double,
 
+        @ManyToOne
+        @JoinColumn(name = "userId")
+        var user: User?,
+
         /* @ManyToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL])
          @JoinTable(name = "ration_dish",
                  joinColumns = [JoinColumn(name = "ration_id")],

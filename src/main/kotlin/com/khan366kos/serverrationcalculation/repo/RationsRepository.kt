@@ -8,6 +8,6 @@ import java.util.*
 
 interface RationsRepository : CrudRepository<Ration, Long> {
 
-    @Query("SELECT r FROM Ration r WHERE r.date = :date")
-    fun findByDate(@Param("date") date: Date): Ration
+    @Query("SELECT r FROM Ration r WHERE r.user.userId = :user and r.date = :date")
+    fun findByDate(@Param("date") date: Date, @Param("user") user: Long): Ration
 }
