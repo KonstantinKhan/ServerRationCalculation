@@ -5,9 +5,12 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 
-/*interface DishesRepository : CrudRepository<Dish, Long> {
+interface DishesRepository : CrudRepository<Dish, Long> {
 
     @Query("SELECT d FROM Dish d WHERE d.name LIKE %:name%")
     fun findByName(@Param("name") name: String): List<Dish>
 
-}*/
+    @Query("SELECT d FROM Dish d WHERE d.user.userName = :userLogin")
+    fun findAllDishesUser(@Param("userLogin") userLogin: String): List<Dish>
+
+}
