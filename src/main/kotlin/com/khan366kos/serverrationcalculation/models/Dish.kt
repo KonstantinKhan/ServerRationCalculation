@@ -3,17 +3,18 @@ package com.khan366kos.serverrationcalculation.models
 import com.fasterxml.jackson.annotation.JsonView
 import javax.persistence.*
 
-/*@Entity
-@Table(name = "dishes")*/
+@Entity
+@Table(name = "dishes")
 data class Dish(
+
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
         @JsonView(View.REST::class)
         val dishId: Long,
 
         @JsonView(View.REST::class)
-        var name: String
+        var name: String,
 
-        /*@JsonView(View.REST::class)
+        @JsonView(View.REST::class)
         var calories: Double,
 
         @JsonView(View.REST::class)
@@ -29,7 +30,17 @@ data class Dish(
         var weightRaw: Int,
 
         @JsonView(View.REST::class)
-        var weightCooked: Int,*/
+        var weightCooked: Int,
+
+        @ManyToOne
+        @JoinColumn(name = "userId")
+        var user: User?,
+
+        @OneToMany(mappedBy = "dish",
+                cascade = [CascadeType.ALL, CascadeType.REMOVE, CascadeType.MERGE, CascadeType.REFRESH],
+                orphanRemoval = true)
+        @JsonView(View.REST::class)
+        val dish_product: MutableList<DishProduct> = mutableListOf()
 
        /* @ManyToMany(mappedBy = "dishes")
         var dishesComposition: MutableList<Ration>?,*/
