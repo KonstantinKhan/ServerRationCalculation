@@ -40,7 +40,10 @@ data class Dish(
                 cascade = [CascadeType.ALL, CascadeType.REMOVE, CascadeType.MERGE, CascadeType.REFRESH],
                 orphanRemoval = true)
         @JsonView(View.REST::class)
-        val dish_product: MutableList<DishProduct> = mutableListOf()
+        val dish_product: MutableList<DishProduct> = mutableListOf(),
+
+        @OneToMany(mappedBy = "dish")
+        val ration_dish: MutableList<RationDish> = mutableListOf()
 
        /* @ManyToMany(mappedBy = "dishes")
         var dishesComposition: MutableList<Ration>?,*/
