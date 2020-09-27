@@ -31,7 +31,7 @@ class AuthController {
     fun auth(@RequestBody user: User): Token {
         val expires = 3600
         val u = userService.findByLoginAndPassword(user.userName, user.userPassword)
-        val t = Token(jwtProvider.generateToken(u!!.userName, expires), expires.toString(), u.userId)
+        val t = Token(jwtProvider.generateToken(u!!.userName, expires), expires.toString())
         return t
     }
 }

@@ -12,7 +12,6 @@ import java.io.IOException
 import javax.servlet.*
 import javax.servlet.http.HttpServletResponse
 
-
 @SpringBootApplication
 class ServerRationCalculationApplication
 
@@ -26,6 +25,7 @@ class WebConfig : WebMvcConfigurer {
 
     override fun configureContentNegotiation(
             configurer: ContentNegotiationConfigurer) {
+        println("configureContentNegotiation")
         configurer
                 .favorParameter(false)
                 .ignoreAcceptHeader(true)
@@ -34,6 +34,7 @@ class WebConfig : WebMvcConfigurer {
     }
 }
 
+/*
 @Component
 class SimpleCORSFilter : Filter {
     @Throws(IOException::class, ServletException::class)
@@ -49,4 +50,4 @@ class SimpleCORSFilter : Filter {
 
     override fun init(filterConfig: FilterConfig?) {}
     override fun destroy() {}
-}
+}*/

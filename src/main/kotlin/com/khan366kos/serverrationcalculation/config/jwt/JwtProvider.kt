@@ -10,6 +10,8 @@ import java.util.*
 @Component
 class JwtProvider {
 
+    lateinit var login: String
+
     fun generateToken(login: String, expires: Int): String {
         val now: Long = Instant.now().toEpochMilli()
         return Jwts.builder()

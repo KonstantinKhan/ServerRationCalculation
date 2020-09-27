@@ -2,6 +2,7 @@ package com.khan366kos.serverrationcalculation.controllers
 
 import com.fasterxml.jackson.annotation.JsonView
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.khan366kos.serverrationcalculation.config.jwt.JwtProvider
 import com.khan366kos.serverrationcalculation.models.Ration
 import com.khan366kos.serverrationcalculation.models.RationProduct
 import com.khan366kos.serverrationcalculation.models.View
@@ -28,14 +29,15 @@ class RationController {
     @Autowired
     lateinit var userRepository: UserRepository
 
-    @RequestMapping("/ration/{date}",
-            method = [RequestMethod.POST], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Autowired
+    lateinit var jwtProvider: JwtProvider
+
+    @RequestMapping("/ration/{date}", produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @JsonView(View.REST::class)
-    fun getRationJSON(@PathVariable date: String, @RequestBody user: Long): Ration? {
-
+    fun getRationJSON(@PathVariable date: String): Ration? {
         return try {
-            rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user)
+            rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
         } catch (e: EmptyResultDataAccessException) {
             null
         }
@@ -55,27 +57,24 @@ class RationController {
             produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @JsonView(View.REST::class)
-    fun addProduct(@PathVariable date: String, @RequestBody request: String): Ration {
+    fun addProduct(@PathVariable date: String, @RequestBody rationProduct: RationProduct): Ration {
         var ration: Ration
-        val mapper = ObjectMapper()
-        val v = mapper.readTree(request)
-        val u = userRepository.findById(v[1].asLong()).get()
-        val rationProduct = mapper.readValue(v[0].toString(), RationProduct::class.java)
+        val user = userRepository.findByLogin(jwtProvider.login)
         try {
             // Получаем рацион по переданной дате
-            ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), v[1].asLong())
+            ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
         } catch (e: EmptyResultDataAccessException) {
             // Создаем пустой рацион для добавления в него выбранного продукта.
-            ration = Ration(0, Date(), 0.0, 0.0, 0.0, 0.0, u)
+            ration = Ration(0, Date(), 0.0, 0.0, 0.0, 0.0, user)
         }
         // Добавляем продукт в рацион.
         ration.addProduct(rationProduct.product, rationProduct.eating)
         // Сохраняем рацион в базу
         rationsRepository.save(ration)
-        ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), v[1].asLong())
+        ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
         rationsRepository.save(ration)
         // Получаем рацион из базы
-        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), v[1].asLong())
+        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
     }
 
     // Удаление продукта из рациона
@@ -85,23 +84,19 @@ class RationController {
     @ResponseBody
     @JsonView(View.REST::class)
     fun deleteProduct(@PathVariable date: String, @RequestBody id: Long, @RequestBody user: Long): Ration {
-        val ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user)
+        val ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
         ration.deleteProduct(id)
         ration.update()
         rationsRepository.save(ration)
-        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user)
+        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
     }
 
     @RequestMapping("update/ration/{date}", method = [RequestMethod.PATCH], produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @JsonView(View.REST::class)
-    fun update(@PathVariable date: String, @RequestBody request: String): Ration {
+    fun update(@PathVariable date: String, @RequestBody rationProduct: RationProduct): Ration {
 
-        val mapper = ObjectMapper()
-        val v = mapper.readTree(request)
-        val rationProduct = mapper.readValue(v[0].toString(), RationProduct::class.java)
-
-        val ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), v[1].asLong())
+        val ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
         ration.ration_product.forEach { value ->
             if (value.rationProductId == rationProduct.rationProductId) {
                 value.weight = rationProduct.weight
@@ -110,7 +105,7 @@ class RationController {
         ration.update()
         rationsRepository.save(ration)
 
-        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), v[1].asLong())
+        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
     }
 
     @RequestMapping("/clear_ration/{date}",
@@ -119,11 +114,11 @@ class RationController {
     @ResponseBody
     @JsonView(View.REST::class)
     fun clearRation(@PathVariable date: String, @RequestBody user: Long): Ration {
-        val ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user)
+        val ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
         ration.clear()
         ration.update()
         rationsRepository.save(ration)
-        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user)
+        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
     }
 
     /*@RequestMapping("/ration", method = [RequestMethod.POST], produces = [MediaType.APPLICATION_JSON_VALUE])

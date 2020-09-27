@@ -1,6 +1,7 @@
 package com.khan366kos.serverrationcalculation.controllers
 
 import com.fasterxml.jackson.annotation.JsonView
+import com.khan366kos.serverrationcalculation.config.jwt.JwtProvider
 import com.khan366kos.serverrationcalculation.models.Product
 import com.khan366kos.serverrationcalculation.models.User
 import com.khan366kos.serverrationcalculation.models.View
@@ -20,6 +21,9 @@ class ProductsController {
 
     @Autowired
     lateinit var rationsRepository: RationsRepository
+
+    @Autowired
+    lateinit var jwtProvider: JwtProvider
 
     /* @RequestMapping("/add_product", produces = [MediaType.APPLICATION_JSON_VALUE])
      @ResponseBody
@@ -57,26 +61,25 @@ class ProductsController {
 //     fun getProductJSON(@PathVariable id: Long): Product {
 //         return repository.findById(id).get()
 //     }
-//
+
     // Продукты, удовлетворяющие поисковому запросу
     @RequestMapping("/products/search/{name}",
-            method = [RequestMethod.POST],
             produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @JsonView(View.REST::class)
-    fun getSearchProducts(@PathVariable name: String, @RequestBody user: Long): List<Product> {
-        return productsRepository.findByName(name, user)
+    fun getSearchProducts(@PathVariable name: String): List<Product> {
+        return productsRepository.findByName(name, jwtProvider.login).toList()
     }
 
-    //
     // Отдаем все продукты, имеющиеся в базе.
-    @RequestMapping("/products/all", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @RequestMapping("/products/all",
+            produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @JsonView(View.REST::class)
     fun getAllProductsJSON(): List<Product> {
-        return productsRepository.findAll().toList()
+        return productsRepository.findAllProductsUser(jwtProvider.login).toList()
     }
-//
+
 //     @RequestMapping("products/all")
 //     fun getAllProducts(model: Model): String {
 //         model.addAttribute("products", repository.findAll())

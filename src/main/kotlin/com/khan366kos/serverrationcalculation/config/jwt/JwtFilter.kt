@@ -26,6 +26,8 @@ class JwtFilter : GenericFilterBean() {
 
     override fun doFilter(servletRequest: ServletRequest?, servletResponse: ServletResponse?, filterChain: FilterChain?) {
 
+        println("doFilter")
+
         val response = servletResponse as HttpServletResponse
         response.setHeader("Access-Control-Allow-Origin", "*")
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PATCH, PUT")
@@ -35,8 +37,8 @@ class JwtFilter : GenericFilterBean() {
 
         val token = getTokenFromRequest(servletRequest as HttpServletRequest)
         if (token != null && jwtProvider.validateToken(token)) {
-            val userLogin = jwtProvider.getLoginFromToken(token)
-            val customUserDetails = customUserDetailsService.loadUserByUsername(userLogin)
+            jwtProvider.login = jwtProvider.getLoginFromToken(token)
+            val customUserDetails = customUserDetailsService.loadUserByUsername(jwtProvider.login)
             val auth = UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.authorities)
             SecurityContextHolder.getContext().authentication = auth
         }
