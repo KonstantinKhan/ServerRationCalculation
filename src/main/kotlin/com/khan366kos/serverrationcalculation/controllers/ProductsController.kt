@@ -3,15 +3,14 @@ package com.khan366kos.serverrationcalculation.controllers
 import com.fasterxml.jackson.annotation.JsonView
 import com.khan366kos.serverrationcalculation.config.jwt.JwtProvider
 import com.khan366kos.serverrationcalculation.models.Product
-import com.khan366kos.serverrationcalculation.models.User
 import com.khan366kos.serverrationcalculation.models.View
 import com.khan366kos.serverrationcalculation.repo.ProductsRepository
 import com.khan366kos.serverrationcalculation.repo.RationsRepository
+import com.khan366kos.serverrationcalculation.repo.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
-import java.lang.reflect.Method
 
 @Controller
 class ProductsController {
@@ -24,6 +23,9 @@ class ProductsController {
 
     @Autowired
     lateinit var jwtProvider: JwtProvider
+
+    @Autowired
+    lateinit var userRepository: UserRepository
 
     /* @RequestMapping("/add_product", produces = [MediaType.APPLICATION_JSON_VALUE])
      @ResponseBody
@@ -77,20 +79,23 @@ class ProductsController {
     @ResponseBody
     @JsonView(View.REST::class)
     fun getAllProductsJSON(): List<Product> {
+        println("getAllProduct()")
         return productsRepository.findAllProductsUser(jwtProvider.login).toList()
     }
 
-//     @RequestMapping("products/all")
+    //     @RequestMapping("products/all")
 //     fun getAllProducts(model: Model): String {
 //         model.addAttribute("products", repository.findAll())
 //         return "allproducts"
 //     }
 //
-//     @RequestMapping("/product", method = [RequestMethod.POST], produces = [MediaType.APPLICATION_JSON_VALUE])
-//     @ResponseBody
-//     fun addProduct(@RequestBody product: Product) {
-//         repository.save(product)
-//     }
+    @RequestMapping("/product/add", method = [RequestMethod.POST], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @ResponseBody
+    fun addProduct(@RequestBody product: Product) {
+        val user = userRepository.findByLogin(jwtProvider.login)
+        product.user = user
+        productsRepository.save(product)
+    }
 //
 //     @RequestMapping("/product/{id}", method = [RequestMethod.DELETE], produces = [MediaType.APPLICATION_JSON_VALUE])
 //     @ResponseBody

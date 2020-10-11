@@ -18,11 +18,11 @@ class DishProduct(
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "dish_id")
-        val dish: Dish?,
+        var dish: Dish?,
 
-        @JsonView(View.REST::class)
-        val eating: String,
-
+       /* @JsonView(View.REST::class)
+        val eating: String?,
+*/
         @JsonView(View.REST::class)
         var weight: Int
 )

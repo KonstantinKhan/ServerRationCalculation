@@ -10,6 +10,6 @@ interface ProductsRepository : CrudRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE (p.user.userName = :user OR p.verified = true) AND p.name LIKE %:name%")
     fun findByName(@Param("name") name: String, @Param("user") user: String): List<Product>
 
-    @Query("SELECT p FROM Product p WHERE p.user.userName = :userLogin")
+    @Query("SELECT p FROM Product p WHERE p.user.userName = :userLogin OR p.verified = true")
     fun findAllProductsUser(@Param("userLogin") userLogin: String): List<Product>
 }

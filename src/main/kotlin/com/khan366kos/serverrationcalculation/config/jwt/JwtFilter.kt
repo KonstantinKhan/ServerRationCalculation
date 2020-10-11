@@ -26,8 +26,6 @@ class JwtFilter : GenericFilterBean() {
 
     override fun doFilter(servletRequest: ServletRequest?, servletResponse: ServletResponse?, filterChain: FilterChain?) {
 
-        println("doFilter")
-
         val response = servletResponse as HttpServletResponse
         response.setHeader("Access-Control-Allow-Origin", "*")
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PATCH, PUT")
