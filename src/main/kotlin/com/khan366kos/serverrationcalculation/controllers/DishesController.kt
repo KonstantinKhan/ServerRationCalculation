@@ -43,7 +43,6 @@ class DishesController {
     fun saveDish(@RequestBody dish: Dish) {
         val user = userRepository.findByLogin(jwtProvider.login)
         dish.user = user
-        println("dishId: ${dish.dishId}")
         dishesRepository.save(dish)
         dish.dish_product.forEach { it.dish = dish }
         dishesRepository.save(dish)
