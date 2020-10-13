@@ -43,7 +43,7 @@ data class Dish(
         val dish_product: MutableList<DishProduct> = mutableListOf(),
 
         @OneToMany(mappedBy = "dish")
-        val ration_dish: MutableList<RationDish> = mutableListOf()
+        val ration_dish: MutableList<RationDish> = mutableListOf(),
 
        /* @ManyToMany(mappedBy = "dishes")
         var dishesComposition: MutableList<Ration>?,*/
@@ -52,6 +52,6 @@ data class Dish(
         @JsonView(View.REST::class)
         var dishComposition: MutableList<DishComposition>,
 */
-       /* @JsonView(View.REST::class)
-        var verified: Boolean = false*/
+        @JsonView(View.REST::class)
+        var verified: Boolean = false
 )
