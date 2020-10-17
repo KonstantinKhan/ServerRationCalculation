@@ -34,25 +34,20 @@ class DishesController {
     @JsonView(View.REST::class)
     @RequestMapping("/dishes/all", produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
-    fun getAllDishJSON(@RequestHeader("Authorization") header: String): List<Dish> {
-
-        println(jwtProvider.getLoginFromToken(header.substring(7)))
-
+    fun getAllDishJSON(@RequestHeader("Authorization") token: String): List<Dish> {
         val dishes = dishesRepository.findAll()
-        return dishesRepository.findAllDishesUser(jwtProvider.login).toList()
+        return dishesRepository.findAllDishesUser(jwtProvider.getLoginFromToken(token.substring(7))).toList()
     }
 
     @RequestMapping("/dish/save", method = [RequestMethod.POST], produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
-    fun saveDish(@RequestBody dish: Dish, @RequestHeader header: RequestHeader) {
-
-        val user = userRepository.findByLogin(jwtProvider.login)
+    fun saveDish(@RequestBody dish: Dish, @RequestHeader("Authorization") token: String) {
+        val user = userRepository.findByLogin(jwtProvider.getLoginFromToken(token.substring(7)))
         dish.user = user
         println(dish.dishId)
         dishesRepository.save(dish)
         dish.dish_product.forEach { it.dish = dish }
         dishesRepository.save(dish)
-
     }
 //
 //    @RequestMapping("/dishes/search/{name}", produces = [MediaType.APPLICATION_JSON_VALUE])
