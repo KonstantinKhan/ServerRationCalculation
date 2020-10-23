@@ -4,13 +4,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
-import org.springframework.stereotype.Component
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer
 import org.springframework.web.servlet.config.annotation.EnableWebMvc
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
-import java.io.IOException
-import javax.servlet.*
-import javax.servlet.http.HttpServletResponse
 
 @SpringBootApplication
 class ServerRationCalculationApplication
