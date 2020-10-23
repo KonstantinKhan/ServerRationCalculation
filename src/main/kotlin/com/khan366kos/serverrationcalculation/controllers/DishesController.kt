@@ -50,10 +50,10 @@ class DishesController {
         dishesRepository.save(dish)
     }
 //
-//    @RequestMapping("/dishes/search/{name}", produces = [MediaType.APPLICATION_JSON_VALUE])
-//    @ResponseBody
-//    @JsonView(View.REST::class)
-//    fun getSearchDishes(@PathVariable name: String): List<Dish> {
-//        return repository.findByName(name)
-//    }
+    @RequestMapping("/dishes/search/{name}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @ResponseBody
+    @JsonView(View.REST::class)
+    fun getSearchDishes(@PathVariable name: String): List<Dish> {
+        return dishesRepository.findByName(name)
+    }
 }
