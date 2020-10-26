@@ -83,12 +83,15 @@ class RationController {
             produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @JsonView(View.REST::class)
-    fun deleteProduct(@PathVariable date: String, @RequestBody id: Long, @RequestBody user: Long): Ration {
-        val ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
+    fun deleteProduct(@PathVariable date: String, @RequestBody id: Long,
+                      @RequestHeader("Authorization") token: String): Ration {
+        val ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date),
+                jwtProvider.getLoginFromToken(token.substring(7)))
         ration.deleteProduct(id)
         ration.update()
         rationsRepository.save(ration)
-        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
+        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date),
+                jwtProvider.getLoginFromToken(token.substring(7)))
     }
 
     @RequestMapping("update/ration/{date}", method = [RequestMethod.PATCH], produces = [MediaType.APPLICATION_JSON_VALUE])

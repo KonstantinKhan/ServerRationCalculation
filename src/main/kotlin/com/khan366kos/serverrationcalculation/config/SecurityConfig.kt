@@ -25,7 +25,6 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     }
 
     override fun configure(http: HttpSecurity) {
-        println("configure")
         http
                 .httpBasic().disable()
                 .csrf().disable()
@@ -33,7 +32,8 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/admin/*", "/dish/*").hasRole("ADMIN")
-                .antMatchers("/ration/*", "/products/search/*", "/add_product/ration/*", "/dish/*")
+                .antMatchers("/ration/*", "/products/search/*", "/add_product/ration/*", "/dish/*",
+                        "/delete_product/ration/*")
                 .hasRole("USER")
                 .antMatchers("/register", "/auth").permitAll()
                 .and()
