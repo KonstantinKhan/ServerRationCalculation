@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonView
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.khan366kos.serverrationcalculation.config.jwt.JwtProvider
 import com.khan366kos.serverrationcalculation.models.Ration
+import com.khan366kos.serverrationcalculation.models.RationDish
 import com.khan366kos.serverrationcalculation.models.RationProduct
 import com.khan366kos.serverrationcalculation.models.View
 import com.khan366kos.serverrationcalculation.repo.ProductsRepository
@@ -57,27 +58,57 @@ class RationController {
             produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @JsonView(View.REST::class)
-    fun addProduct(@PathVariable date: String, @RequestBody rationProduct: RationProduct): Ration {
+    fun addProduct(@PathVariable date: String,
+                   @RequestBody rationProduct: RationProduct,
+                   @RequestHeader("Authorization") token: String): Ration {
         var ration: Ration
-        val user = userRepository.findByLogin(jwtProvider.login)
-        try {
+        val user = userRepository.findByLogin(jwtProvider.getLoginFromToken(token.substring(7)))
+        ration = try {
             // Получаем рацион по переданной дате
-            ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
+            rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user.userName)
         } catch (e: EmptyResultDataAccessException) {
             // Создаем пустой рацион для добавления в него выбранного продукта.
-            ration = Ration(0, Date(), 0.0, 0.0, 0.0, 0.0, user)
+            Ration(0, Date(), 0.0, 0.0, 0.0, 0.0, user)
         }
         // Добавляем продукт в рацион.
         ration.addProduct(rationProduct.product, rationProduct.eating)
         // Сохраняем рацион в базу
         rationsRepository.save(ration)
-        ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
+        ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user.userName)
         rationsRepository.save(ration)
         // Получаем рацион из базы
-        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
+        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user.userName)
     }
 
-    // Удаление продукта из рациона
+    // Метод для добавления блюда в рацион
+    @RequestMapping("/add_dish/ration/{date}",
+            method = [RequestMethod.POST],
+            produces = [MediaType.APPLICATION_JSON_VALUE])
+    @ResponseBody
+    @JsonView(View.REST::class)
+    fun addDish(@PathVariable date: String,
+                @RequestBody rationDish: RationDish,
+                @RequestHeader("Authorization") token: String): Ration {
+        var ration: Ration
+        val user = userRepository.findByLogin(jwtProvider.getLoginFromToken(token.substring(7)))
+        ration = try {
+            // Получаем рацион по переданной дате
+            rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user.userName)
+        } catch (e: EmptyResultDataAccessException) {
+            // Создаем пустой рацион для добавления в него выбранного продукта.
+            Ration(0, Date(), 0.0, 0.0, 0.0, 0.0, user)
+        }
+        // Добавляем блюдо в рацион
+        ration.addDish(rationDish.dish, rationDish.eating)
+        // Сохраняем рацион в базу
+        rationsRepository.save(ration)
+        ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user.userName)
+        rationsRepository.save(ration)
+        // Получаем рацион из базы
+        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), user.userName)
+    }
+
+    // Метод для удаления продукта из рациона
     @RequestMapping("/delete_product/ration/{date}",
             method = [RequestMethod.PATCH],
             produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -94,10 +125,30 @@ class RationController {
                 jwtProvider.getLoginFromToken(token.substring(7)))
     }
 
-    @RequestMapping("update/ration/{date}", method = [RequestMethod.PATCH], produces = [MediaType.APPLICATION_JSON_VALUE])
+    // Метод для удаления блюда из рациона
+    @RequestMapping("/delete_dish/ration/{date}",
+            method = [RequestMethod.PATCH],
+            produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     @JsonView(View.REST::class)
-    fun update(@PathVariable date: String, @RequestBody rationProduct: RationProduct): Ration {
+    fun deleteDish(@PathVariable date: String,
+                   @RequestBody id: Long,
+                   @RequestHeader("Authorization") token: String): Ration {
+        val ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date),
+                jwtProvider.getLoginFromToken(token.substring(7)))
+        ration.deleteDish(id)
+        ration.update()
+        rationsRepository.save(ration)
+        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date),
+                jwtProvider.getLoginFromToken(token.substring(7)))
+    }
+
+    @RequestMapping("update/ration_product/{date}",
+            method = [RequestMethod.PATCH],
+            produces = [MediaType.APPLICATION_JSON_VALUE])
+    @ResponseBody
+    @JsonView(View.REST::class)
+    fun updateByProduct(@PathVariable date: String, @RequestBody rationProduct: RationProduct): Ration {
 
         val ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
         ration.ration_product.forEach { value ->
@@ -109,6 +160,30 @@ class RationController {
         rationsRepository.save(ration)
 
         return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
+    }
+
+    @RequestMapping("update/ration_dish/{date}",
+            method = [RequestMethod.PATCH],
+            produces = [MediaType.APPLICATION_JSON_VALUE])
+    @ResponseBody
+    @JsonView(View.REST::class)
+    fun updateByDish(@PathVariable date: String,
+                     @RequestBody rationDish: RationDish,
+                     @RequestHeader("Authorization") token: String
+    ): Ration {
+
+        val ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date),
+                jwtProvider.getLoginFromToken(token.substring(7)))
+        ration.ration_dish.forEach { value ->
+            if (value.rationDishId == rationDish.rationDishId) {
+                value.weight = rationDish.weight
+            }
+        }
+        ration.update()
+        rationsRepository.save(ration)
+
+        return rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date),
+                jwtProvider.getLoginFromToken(token.substring(7)))
     }
 
     @RequestMapping("/clear_ration/{date}",

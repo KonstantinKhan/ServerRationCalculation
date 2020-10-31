@@ -45,7 +45,13 @@ data class Ration(
                 cascade = [CascadeType.ALL, CascadeType.REMOVE, CascadeType.MERGE, CascadeType.REFRESH],
                 orphanRemoval = true)
         @JsonView(View.REST::class)
-        val ration_product: MutableList<RationProduct> = mutableListOf()
+        val ration_product: MutableList<RationProduct> = mutableListOf(),
+
+        @OneToMany(mappedBy = "ration",
+                cascade = [CascadeType.ALL, CascadeType.REMOVE, CascadeType.MERGE, CascadeType.REFRESH],
+                orphanRemoval = true)
+        @JsonView(View.REST::class)
+        val ration_dish: MutableList<RationDish> = mutableListOf()
         /*@ManyToMany(fetch = FetchType.LAZY,
                 cascade = [
                     CascadeType.REFRESH])
@@ -55,9 +61,14 @@ data class Ration(
         @JsonView(View.REST::class)
         var products: MutableList<Product>*/
 ) {
-    // Добавление продукта
+    // Метод добавления продукта в рацион
     fun addProduct(product: Product, eating: String) {
         ration_product.add(RationProduct(0, product, this, eating, 0))
+    }
+
+    // Метод добавления блюда в рацион
+    fun addDish(dish: Dish, eating: String) {
+        ration_dish.add(RationDish(0, dish, this, eating, 0))
     }
 
     // Удаление продукта
@@ -75,7 +86,22 @@ data class Ration(
         }
     }
 
-    // Обновление параметров рациона
+    // Метод для удаления блюда из рациона
+    fun deleteDish(id: Long) {
+        var i = 0
+        var remove = false
+        ration_dish.forEach { value ->
+            if (value.rationDishId == id) {
+                i = ration_dish.indexOf(value)
+                remove = true
+            }
+        }
+        if (remove) {
+            ration_dish.removeAt(i)
+        }
+    }
+
+    // Метод для обновления параметров рациона
     fun update() {
         calories = 0.0
         proteins = 0.0
@@ -86,6 +112,12 @@ data class Ration(
             proteins += value.product.proteins * value.weight / 100
             fats += value.product.fats * value.weight / 100
             carbohydrates += value.product.carbohydrates * value.weight / 100
+        }
+        ration_dish.forEach { value ->
+            calories += value.dish.calories * value.weight / 100
+            proteins += value.dish.proteins * value.weight / 100
+            fats += value.dish.fats * value.weight / 100
+            carbohydrates += value.dish.carbohydrates * value.weight / 100
         }
     }
 

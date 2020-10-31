@@ -5,7 +5,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "ration_dish")
-class RationDish(
+data class RationDish(
 
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
         @JsonView(View.REST::class)
@@ -18,7 +18,7 @@ class RationDish(
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "ration_id")
-        val ration: Ration,
+        val ration: Ration?,
 
         @JsonView(View.REST::class)
         val eating: String,
