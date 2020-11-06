@@ -3,10 +3,8 @@ package com.khan366kos.serverrationcalculation.controllers
 import com.fasterxml.jackson.annotation.JsonView
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.khan366kos.serverrationcalculation.config.jwt.JwtProvider
-import com.khan366kos.serverrationcalculation.models.Ration
-import com.khan366kos.serverrationcalculation.models.RationDish
-import com.khan366kos.serverrationcalculation.models.RationProduct
-import com.khan366kos.serverrationcalculation.models.View
+import com.khan366kos.serverrationcalculation.models.*
+import com.khan366kos.serverrationcalculation.repo.DishesRepository
 import com.khan366kos.serverrationcalculation.repo.ProductsRepository
 import com.khan366kos.serverrationcalculation.repo.RationsRepository
 import com.khan366kos.serverrationcalculation.repo.UserRepository
@@ -28,6 +26,9 @@ class RationController {
     lateinit var productsRepository: ProductsRepository
 
     @Autowired
+    lateinit var dishesRepository: DishesRepository
+
+    @Autowired
     lateinit var userRepository: UserRepository
 
     @Autowired
@@ -38,6 +39,7 @@ class RationController {
     @JsonView(View.REST::class)
     fun getRationJSON(@PathVariable date: String): Ration? {
         return try {
+            println("end getRation()")
             rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
         } catch (e: EmptyResultDataAccessException) {
             null
@@ -98,6 +100,18 @@ class RationController {
             // Создаем пустой рацион для добавления в него выбранного продукта.
             Ration(0, Date(), 0.0, 0.0, 0.0, 0.0, user)
         }
+
+        var d: Dish = rationDish.dish
+
+        rationDish.dish.user = user
+
+        rationDish.dish.dish_product.forEach {
+            it.dish = d
+        }
+
+        // Добавляем блюдо в базу
+        dishesRepository.save(rationDish.dish)
+
         // Добавляем блюдо в рацион
         ration.addDish(rationDish.dish, rationDish.eating)
         // Сохраняем рацион в базу
@@ -174,6 +188,7 @@ class RationController {
 
         val ration = rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date),
                 jwtProvider.getLoginFromToken(token.substring(7)))
+
         ration.ration_dish.forEach { value ->
             if (value.rationDishId == rationDish.rationDishId) {
                 value.weight = rationDish.weight

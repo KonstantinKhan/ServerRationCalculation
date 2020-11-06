@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonView
 import javax.persistence.*
 
 @Entity
-@Table(name = "dishes")
-data class Dish(
+@Table(name = "dishes_template")
+data class DishTemplate(
 
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
         @JsonView(View.REST::class)
-        val dishId: Long,
+        val dishTemplateId: Long,
 
         @JsonView(View.REST::class)
         var name: String,
@@ -36,20 +36,12 @@ data class Dish(
         @JoinColumn(name = "userId")
         var user: User?,
 
-        @OneToMany(mappedBy = "dish",
+        @OneToMany(mappedBy = "dishTemplate",
                 cascade = [CascadeType.ALL, CascadeType.REMOVE, CascadeType.MERGE, CascadeType.REFRESH],
                 orphanRemoval = true)
         @JsonView(View.REST::class)
-        val dish_product: MutableList<DishProduct> = mutableListOf(),
+        val dishTemplate_product: MutableList<DishTemplateProduct> = mutableListOf(),
 
-        @OneToMany(mappedBy = "dish")
-        val ration_dish: MutableList<RationDish> = mutableListOf()
-
-       /* @ManyToMany(mappedBy = "dishes")
-        var dishesComposition: MutableList<Ration>?,*/
-
-      /*  @OneToMany(mappedBy = "dish")
         @JsonView(View.REST::class)
-        var dishComposition: MutableList<DishComposition>,
-*/
+        var verified: Boolean = false
 )

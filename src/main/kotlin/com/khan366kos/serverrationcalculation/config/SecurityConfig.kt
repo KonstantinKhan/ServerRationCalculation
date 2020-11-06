@@ -34,7 +34,8 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
                 .antMatchers("/admin/*", "/dish/*").hasRole("ADMIN")
                 .antMatchers("/ration/*", "/products/search/*",
                         "/add_product/ration/*", "/add_dish/ration/*", "/dish/*",
-                        "/delete_product/ration/*", "/delete_dish/ration/*")
+//                        "/delete_product/ration/*",
+                        "/delete_dish/ration/*")
                 .hasRole("USER")
                 .antMatchers("/register", "/auth").permitAll()
                 .and()

@@ -32,6 +32,9 @@ data class Product(
         @OneToMany(mappedBy = "product")
         val dish_product: MutableList<DishProduct> = mutableListOf(),
 
+        @OneToMany(mappedBy = "product")
+        val dishTemplate_product: MutableList<DishTemplateProduct> = mutableListOf(),
+
         /*@ManyToMany(mappedBy = "products")
         var productsComposition: MutableList<Ration>?,*/
 
