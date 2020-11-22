@@ -21,7 +21,6 @@ class WebConfig : WebMvcConfigurer {
 
     override fun configureContentNegotiation(
             configurer: ContentNegotiationConfigurer) {
-        println("configureContentNegotiation")
         configurer
                 .favorParameter(false)
                 .ignoreAcceptHeader(true)

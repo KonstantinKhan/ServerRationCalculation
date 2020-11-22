@@ -39,11 +39,16 @@ class RationController {
     @JsonView(View.REST::class)
     fun getRationJSON(@PathVariable date: String): Ration? {
         return try {
-            println("end getRation()")
             rationsRepository.findByDate(SimpleDateFormat("yyyy-MM-dd").parse(date), jwtProvider.login)
         } catch (e: EmptyResultDataAccessException) {
             null
         }
+    }
+
+    @RequestMapping("/")
+    @ResponseBody
+    fun hello(): String {
+        return "Hello!"
     }
 
     @RequestMapping("/remove_ration/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])

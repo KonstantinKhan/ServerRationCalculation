@@ -18,15 +18,19 @@ class AuthController {
     @Autowired
     lateinit var jwtProvider: JwtProvider
 
-    @RequestMapping("/register", method = [RequestMethod.POST], produces = [MediaType.APPLICATION_JSON_VALUE])
+    // Метод для регистрации данных пользователя.
+    @RequestMapping("/registration",
+            method = [RequestMethod.POST],
+            produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
-    fun registerUser(@RequestBody user: User): String {
+    fun registration(@RequestBody user: User) {
         val u = User(0, user.userName, user.userPassword, null)
         userService.saveUser(u)
-        return "OK"
     }
 
-    @RequestMapping("/auth", method = [RequestMethod.POST], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @RequestMapping("/auth",
+            method = [RequestMethod.POST],
+            produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseBody
     fun auth(@RequestBody user: User): Token {
         val expires = 3600
